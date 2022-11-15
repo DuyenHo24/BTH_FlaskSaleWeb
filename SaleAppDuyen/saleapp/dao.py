@@ -1,11 +1,29 @@
-import json
-from saleapp import app
-
+from saleapp.models import Category, Product, User
+import hashlib
 
 def load_categories():
-    with open('%s/data/categories.json' % app.root_path, encoding='utf-8') as f:
-        return json.load(f)
+    return Category.query.all()
 
-def load_products():
-   with open('%s/data/products.json' % app.root_path, encoding= 'utf-8') as f:
-       return json.load(f)
+def load_products(cate_id=None, kw=None):
+    query = Product.query
+
+    if cate_id:
+        query = query.filter(Product.category_id.__eq__(cate_id))
+
+    if kw:
+        query = query.filter(Product.name.contains(kw))
+
+    return query.all()
+
+#lấy chi tiết sản phẩm
+def get_product_by_id(product_id):
+    return Product.query.get(product_id)
+
+#hàm chứng thực người dùng
+def auth_user(username, password):
+    password = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest()) #strip()là cắt khoảng trắng 2 đầu
+
+    return User.query.filter(User.username.__eq__(username.strip()),
+                             User.password.__eq__(password)).first() #.first() xc thực lấy thằng đầu tiên
+def get_user_by_id(user_id):
+    return User.query.get(user_id)

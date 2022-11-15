@@ -1,0 +1,24 @@
+<nav class="navbar navbar-expand-sm navbar-dark" style="background-color:#06283D">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">BÁN HÀNG TRỰC TUYẾN </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Trang chủ</a>
+                </li>
+                {% for cate in categories %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/?category_id={{cate.id}}">{{ cate.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            <form class="d-flex" action="/">
+                <input class="form-control me-2" name="keyword" type="text" placeholder="Nhập từ khóa...">
+                <button class="btn" type="submit" style="background-color: #DFF6FF">Tìm</button>
+            </form>
+        </div>
+    </div>
+</nav>
