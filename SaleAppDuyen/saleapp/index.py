@@ -1,11 +1,11 @@
-from flask import render_template, request, redirect
-from saleapp import app, dao, admin, login
+from flask import render_template, request, redirect, session, jsonify
+from saleapp import app, dao, admin, login, utils
 from flask_login import login_user, logout_user, login_required
 from saleapp.decorators import annonymous_user
 import cloudinary.uploader
 
 @app.route("/")
-@login_required #phải đăng nhập thì mới vô trang chủ được
+#@login_required #phải đăng nhập thì mới vô trang chủ được
 def index():
     cate_id = request.args.get('category_id')
     kw = request.args.get('keyword')
@@ -63,19 +63,66 @@ def login_my_user():
         user = dao.auth_user(username=username, password=password)
         if user:
             login_user(user=user)
-            return redirect('/')
+
+            n = request.args.get("next")
+            return redirect(n if n else '/')
 
     return render_template('login.html')
 @app.route('/logout')
 def logout_my_user():
     logout_user()
     return redirect('/login')
+
+@app.route('/cart')
+def cart():
+    # session['cart'] = {
+    #     "1": {
+    #         "id": "1",
+    #         "name": "iPhone 13",
+    #         "price": 13000000,
+    #         "quantity": 2
+    #     },
+    #     "2": {
+    #         "id": "2",
+    #         "name": "iPhone 14",
+    #         "price": 13000000,
+    #         "quantity": 2
+    #     }
+    # }
+    return render_template('cart.html')
+
+@app.route('/api/cart', methods=['post'])
+def add_to_cart():
+    key = app.config['CART_KEY']
+    cart = session[key] if key in session else {}
+
+    data = request.json
+    id = str(data['id'])
+
+    if id in cart:
+        cart[id]['quantity'] += 1
+    else:
+        name = data['name']
+        price = data['price']
+
+        cart[id] = {
+            "id": id,
+            "name": name,
+            "price": price,
+            "quantity": 1
+        }
+
+    session[key] = cart
+
+    return jsonify(utils.cart_stats(cart))
+
 @app.context_processor
 def common_attr():
     categories = dao.load_categories()
 
     return {
-        'categories':categories
+        'categories': categories,
+        'cart': utils.cart_stats(session.get(app.config['CART_KEY']))
     }
 
 @login.user_loader
