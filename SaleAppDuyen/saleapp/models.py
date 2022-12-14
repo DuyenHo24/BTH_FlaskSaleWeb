@@ -36,9 +36,9 @@ class Product(BaseModel):
 
     name = Column(String(50), nullable=False)
     description = Column(Text)
-    price = Column(Float, default = 0)
+    price = Column(Float, default=0)
     image = Column(String(100))
-    active = Column(Boolean, default = True)
+    active = Column(Boolean, default=True)
     category_id = Column(Integer, ForeignKey(Category.id), nullable=False)
     receipt_details = relationship('ReceiptDetails', backref='product', lazy=True)
     tags = relationship('Tag', secondary='prod_tag', lazy='subquery',
